@@ -1,5 +1,5 @@
 from .base import BaseAction
-import sys
+import sys, os
 
 class PylintAction(BaseAction):
 
@@ -9,7 +9,9 @@ class PylintAction(BaseAction):
     
     @classmethod
     def command(self) -> str:
-        return "pylint ./src tests"
+        paths = os.getenv("PY_PATHS", "./src tests")
+        args  = os.getenv("PYLINT_ARGS", "")
+        return f"pylint {args} {paths}"
     
 if __name__ == "__main__":
     sys.exit(PylintAction().run())
