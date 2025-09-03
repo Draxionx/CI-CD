@@ -11,11 +11,11 @@ class ShellcheckAction(BaseAction):
         args  = os.getenv("SHELLCHECK_ARGS", "-S style -x")
 
         return (
-            "bash -lc \""
-            f"files=\\\"$(git ls-files {globs} || true)\\\"; "
-            "[ -z \\\"$files\\\" ] && echo 'No shell scripts; skipping.' && exit 0; "
-            f"shellcheck {args} $files"
-            "\""
+            "bash -lc '"
+            "shopt -s globstar nullglob; "
+            f"files=( {globs} ); "
+            'if (( ${#files[@]} == 0 )); then echo \"No shell scripts; skipping.\"; exit 0; fi; '
+            f"shellcheck {args} \"${{files[@]}}\"'"
         )
 
 if __name__ == '__main__':
