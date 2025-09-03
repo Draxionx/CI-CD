@@ -10,6 +10,7 @@ python3 \
 golang-go \
 g++ \
 curl \
+ca-certificates \
 shellcheck \
 clang-tidy \
 clang-tools \

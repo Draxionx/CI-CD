@@ -41,14 +41,14 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       GOLANGCI_ARGS: "./..."
-  steps:
-    - uses: actions/checkout@v4
-    - run: go build ./...
-      working-directory: src/golang
-    - run: go test ./... -count=1
-      working-directory: src/golang
-    - run: python3 -m ci.actions.golang_lint_action
-      working-directory: src/golang
+    steps:
+      - uses: actions/checkout@v4
+      - run: go build ./...
+        working-directory: src/golang
+      - run: go test ./... -count=1
+        working-directory: src/golang
+      - run: python3 -m ci.actions.golang_lint_action
+        working-directory: src/golang
 
   cpp-tidy:
     runs-on: ubuntu-latest
