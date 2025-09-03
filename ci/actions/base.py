@@ -11,13 +11,11 @@ class BaseAction(ABC):
     def command(self) -> str:
         """Command to run action"""
 
-    def run(self) ->int:
+    def run(self) -> int:
         cmd = self.command()
-        print("[{self.name}] Running: {cmd}")
+        n = type(self).name()
+        print(f"[{n}] Running: {cmd}")
         rc = subprocess.call(cmd, shell=True)
-        if rc == 0:
-            print("[{self.name}] Passed")
-        else:
-            print("[{self.name}] Failed with exit code {rc}")
+        print(f"[{n}] {'Passed' if rc == 0 else f'Failed with exit code {rc}'}")
         return rc
 

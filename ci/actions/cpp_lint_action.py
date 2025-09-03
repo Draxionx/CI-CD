@@ -1,7 +1,7 @@
 from .base import BaseAction
 import sys, os
 
-class CPlusPlusLint(BaseAction):
+class CppLint(BaseAction):
 
     @classmethod
     def name(cls) -> str:
@@ -15,4 +15,4 @@ class CPlusPlusLint(BaseAction):
         return f"run-clang-tidy -p {build} -header-filter='{hdr}' {src}/"
     
 if __name__ == "__main__":
-    sys.exit(CPlusPlusLint().run())
+    sys.exit(CppLint().run())
