@@ -41,11 +41,14 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       GOLANGCI_ARGS: "./..."
-    steps:
-      - uses: actions/checkout@v4
-      - run: go build ./...
-      - run: go test ./... -count=1
-      - run: python3 -m ci.actions.golang_lint_action
+  steps:
+    - uses: actions/checkout@v4
+    - run: go build ./...
+      working-directory: src/golang
+    - run: go test ./... -count=1
+      working-directory: src/golang
+    - run: python3 -m ci.actions.golang_lint_action
+      working-directory: src/golang
 
   cpp-tidy:
     runs-on: ubuntu-latest
@@ -75,7 +78,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
-      SH_GLOBS: "ops/scripts/*.sh deploy/*.sh **/*.sh"
+      SH_GLOBS: "src/shell/*.sh"
       SHELLCHECK_ARGS: "-S style -x"
     steps:
       - uses: actions/checkout@v4
