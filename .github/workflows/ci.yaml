@@ -10,12 +10,14 @@ on:
 permissions:
   packages: read
   contents: read
+env:
+  REPO_LC: draxionx/ci-cd
 
 jobs:
   python-lint:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/cicd:latest
+      image: ghcr.io/${{ env.REPO_LC }}/cicd:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -35,7 +37,7 @@ jobs:
   go-lint:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/cicd:latest
+      image: ghcr.io/${{ env.REPO_LC }}/cicd:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -50,7 +52,7 @@ jobs:
   cpp-tidy:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/cicd:latest
+      image: ghcr.io/${{ env.REPO_LC }}/cicd:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -70,7 +72,7 @@ jobs:
   shell-lint:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/cicd:latest
+      image: ghcr.io/${{ env.REPO_LC }}/cicd:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
