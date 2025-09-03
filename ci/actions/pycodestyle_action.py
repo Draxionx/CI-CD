@@ -1,5 +1,5 @@
 from .base import BaseAction
-import sys
+import sys, os
 
 class PyCodeStyleAction(BaseAction):
 
@@ -9,7 +9,9 @@ class PyCodeStyleAction(BaseAction):
     
     @classmethod
     def command(self) -> str:
-        return "pycodestyle --max-line-length=100 ./src tests"
+        paths = os.getenv("PY_PATHS", "./src tests")
+        args  = os.getenv("PYCODESTYLE_ARGS", "--max-line-length=100")
+        return f"pycodestyle {args} {paths}"
     
 if __name__ == "__main__":
     sys.exit(PyCodeStyleAction().run())

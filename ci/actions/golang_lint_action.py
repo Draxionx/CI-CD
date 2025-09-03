@@ -1,5 +1,5 @@
 from .base import BaseAction
-import sys
+import sys, os
 
 class GolangLintAction(BaseAction):
 
@@ -9,7 +9,8 @@ class GolangLintAction(BaseAction):
     
     @classmethod
     def command(self) -> str:
-        return "golangci-lint run"
+        args = os.getenv("GOLANGCI_ARGS", "")
+        return f"golangci-lint run {args}"
     
 if __name__ == "__main__":
     sys.exit(GolangLintAction().run())

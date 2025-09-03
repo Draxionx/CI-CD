@@ -1,4 +1,4 @@
-name: CI (GHCR job container)
+name: CI
 
 on:
   push:
@@ -7,71 +7,84 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+permissions:
+  packages: read
+  contents: read
+
 jobs:
   python-lint:
-    name: Python — build & linters
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/cicd:latest
-    if: ${{ hashFiles('**/*.py') != '' }}
+      image: ghcr.io/draxionx/ci-cd/cicd:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      PY_PATHS: "./src/python/*.py"
+      PYLINT_ARGS: ""
+      PYCODESTYLE_ARGS: "--max-line-length=120"
     steps:
       - uses: actions/checkout@v4
 
-      # Optional: syntax compile
-      - name: Byte-compile (syntax check)
-        run: |
-          python3 - <<'PY'
-          import compileall, sys
-          sys.exit(0 if compileall.compile_dir('.', maxlevels=10, quiet=1) else 1)
-          PY
-
-      - name: pycodestyle (custom action)
+      - name: Run pycodestyle
         run: python3 -m ci.actions.pycodestyle_action
 
-      - name: pylint (custom action)
+      - name: Run pylint
         run: python3 -m ci.actions.pylint_action
 
-  go-build-lint:
-    name: Go — build, test, lint
+  go-lint:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/cicd:latest
-    if: ${{ hashFiles('go.mod') != '' }}
+      image: ghcr.io/draxionx/ci-cd/cicd:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      GOLANGCI_ARGS: "./..."
     steps:
       - uses: actions/checkout@v4
       - run: go build ./...
+        working-directory: src/golang
       - run: go test ./... -count=1
-      # Use your Python wrapper for consistency (or call golangci-lint directly)
+        working-directory: src/golang
       - name: golangci-lint (custom action)
         run: python3 -m ci.actions.golang_lint_action
+        working-directory: src/golang
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          GOLANGCI_ARGS: "./..."
 
-  cpp-build-tidy:
-    name: C/C++ — build & clang-tidy
+  cpp-tidy:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/cicd:latest
-    if: ${{ hashFiles('**/*.{c,cc,cpp,cxx,h,hpp,hxx}') != '' }}
+      image: ghcr.io/draxionx/ci-cd/cicd:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      CPP_BUILD_DIR: "build"
+      CPP_SRC: "src"
+      CPP_HEADER_FILTER: "src/.*"
     steps:
       - uses: actions/checkout@v4
-
-      - name: Configure (CMake) and build
+      - name: Configure & build
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-          cmake --build build --parallel
-
-      - name: clang-tidy (custom action)
+          cmake -S . -B "$CPP_BUILD_DIR" -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build "$CPP_BUILD_DIR" --parallel
+      - name: run clang-tidy via action
         run: python3 -m ci.actions.cpp_lint_action
 
   shell-lint:
-    name: Shell — shellcheck
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/cicd:latest
-    if: ${{ hashFiles('**/*.sh') != '' }}
+      image: ghcr.io/draxionx/ci-cd/cicd:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      SH_GLOBS: "src/shell/*.sh"
+      SHELLCHECK_ARGS: "-S style -x"
     steps:
       - uses: actions/checkout@v4
-      # You can keep this as a direct command or create a Python wrapper like others
-      - run: |
-          files="$(git ls-files '*.sh' || true)"
-          [ -z "$files" ] && { echo "No shell scripts"; exit 0; }
-          shellcheck -S style -x $files
+      - name: ShellCheck (custom action)
+        run: python3 -m ci.actions.shellcheck_action
