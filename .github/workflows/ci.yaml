@@ -28,53 +28,53 @@ jobs:
       - name: Run pylint
         run: python -m ci.actions.pylint_action
 
-go-lint:
-  runs-on: ubuntu-latest
-  container:
-    image: ghcr.io/${{ toLower(github.repository) }}/cicd:latest
-    credentials:
-      username: ${{ github.actor }}
-      password: ${{ secrets.GITHUB_TOKEN }}
-  env:
-    GOLANGCI_ARGS: "./..."
-  steps:
-    - uses: actions/checkout@v4
-    - run: go build ./...
-    - run: go test ./... -count=1
-    - run: python3 -m ci.actions.golang_lint_action
+  go-lint:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ toLower(github.repository) }}/cicd:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      GOLANGCI_ARGS: "./..."
+    steps:
+      - uses: actions/checkout@v4
+      - run: go build ./...
+      - run: go test ./... -count=1
+      - run: python3 -m ci.actions.golang_lint_action
 
-cpp-tidy:
-  runs-on: ubuntu-latest
-  container:
-    image: ghcr.io/${{ toLower(github.repository) }}/cicd:latest
-    credentials:
-      username: ${{ github.actor }}
-      password: ${{ secrets.GITHUB_TOKEN }}
-  env:
-    CPP_BUILD_DIR: "build"
-    CPP_SRC: "src"
-    CPP_HEADER_FILTER: "src/c++*"
-  steps:
-    - uses: actions/checkout@v4
-    - name: Configure & build
-      run: |
-        cmake -S . -B "$CPP_BUILD_DIR" -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-        cmake --build "$CPP_BUILD_DIR" --parallel
-    - name: run clang-tidy via action
-      run: python3 -m ci.actions.cpp_lint_action
-          fi
+  cpp-tidy:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ toLower(github.repository) }}/cicd:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      CPP_BUILD_DIR: "build"
+      CPP_SRC: "src"
+      CPP_HEADER_FILTER: "src/c++*"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure & build
+        run: |
+          cmake -S . -B "$CPP_BUILD_DIR" -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build "$CPP_BUILD_DIR" --parallel
+      - name: run clang-tidy via action
+        run: python3 -m ci.actions.cpp_lint_action
+            fi
 
-shell-lint:
-  runs-on: ubuntu-latest
-  container:
-    image: ghcr.io/${{ toLower(github.repository) }}/cicd:latest
-    credentials:
-      username: ${{ github.actor }}
-      password: ${{ secrets.GITHUB_TOKEN }}
-  env:
-    SH_GLOBS: "ops/scripts/*.sh deploy/*.sh **/*.sh"
-    SHELLCHECK_ARGS: "-S style -x"
-  steps:
-    - uses: actions/checkout@v4
-    - name: ShellCheck (custom action)
-      run: python3 -m ci.actions.shellcheck_action
+  shell-lint:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ toLower(github.repository) }}/cicd:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      SH_GLOBS: "ops/scripts/*.sh deploy/*.sh **/*.sh"
+      SHELLCHECK_ARGS: "-S style -x"
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck (custom action)
+        run: python3 -m ci.actions.shellcheck_action
