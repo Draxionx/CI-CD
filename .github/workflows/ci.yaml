@@ -47,8 +47,9 @@ jobs:
         working-directory: src/golang
       - run: go test ./... -count=1
         working-directory: src/golang
-      - run: python3 -m ci.actions.golang_lint_action
-        working-directory: src/golang
+      - name: golangci-lint (custom action)
+        run: python3 -m ci.actions.golang_lint_action
+        working-directory: ${{ github.workspace }}
 
   cpp-tidy:
     runs-on: ubuntu-latest

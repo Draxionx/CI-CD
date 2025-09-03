@@ -1,2 +1,4 @@
-#!/usr/bin/env python
+"""
+DEMO Python Program
+"""
 print("DEMO Python Program")
