@@ -27,10 +27,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run pycodestyle
-        run: python3 -m ci.actions.pycodestyle_action
+        run: python3 -m ci.actions.pycodestyle-action
 
       - name: Run pylint
-        run: python3 -m ci.actions.pylint_action
+        run: python3 -m ci.actions.pylint-action
 
   go-lint:
     runs-on: ubuntu-latest
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: go build ./...
       - run: go test ./... -count=1
-      - run: python3 -m ci.actions.golang_lint_action
+      - run: python3 -m ci.actions.golanglint-action
 
   cpp-tidy:
     runs-on: ubuntu-latest
@@ -65,7 +65,7 @@ jobs:
           cmake -S . -B "$CPP_BUILD_DIR" -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           cmake --build "$CPP_BUILD_DIR" --parallel
       - name: run clang-tidy via action
-        run: python3 -m ci.actions.cpp_lint_action
+        run: python3 -m ci.actions.cpluspluslint-action
 
   shell-lint:
     runs-on: ubuntu-latest
@@ -80,4 +80,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: ShellCheck (custom action)
-        run: python3 -m ci.actions.shellcheck_action
+        run: python3 -m ci.actions.shellcheck-action
