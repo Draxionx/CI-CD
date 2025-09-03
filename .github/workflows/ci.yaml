@@ -49,7 +49,10 @@ jobs:
         working-directory: src/golang
       - name: golangci-lint (custom action)
         run: python3 -m ci.actions.golang_lint_action
-        working-directory: ${{ github.workspace }}
+        working-directory: src/golang
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          GOLANGCI_ARGS: "./..."
 
   cpp-tidy:
     runs-on: ubuntu-latest
