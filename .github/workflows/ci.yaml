@@ -1,0 +1,77 @@
+name: CI (GHCR job container)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  python-lint:
+    name: Python — build & linters
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/cicd:latest
+    if: ${{ hashFiles('**/*.py') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Optional: syntax compile
+      - name: Byte-compile (syntax check)
+        run: |
+          python3 - <<'PY'
+          import compileall, sys
+          sys.exit(0 if compileall.compile_dir('.', maxlevels=10, quiet=1) else 1)
+          PY
+
+      - name: pycodestyle (custom action)
+        run: python3 -m ci.actions.pycodestyle_action
+
+      - name: pylint (custom action)
+        run: python3 -m ci.actions.pylint_action
+
+  go-build-lint:
+    name: Go — build, test, lint
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/cicd:latest
+    if: ${{ hashFiles('go.mod') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: go build ./...
+      - run: go test ./... -count=1
+      # Use your Python wrapper for consistency (or call golangci-lint directly)
+      - name: golangci-lint (custom action)
+        run: python3 -m ci.actions.golang_lint_action
+
+  cpp-build-tidy:
+    name: C/C++ — build & clang-tidy
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/cicd:latest
+    if: ${{ hashFiles('**/*.{c,cc,cpp,cxx,h,hpp,hxx}') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (CMake) and build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build build --parallel
+
+      - name: clang-tidy (custom action)
+        run: python3 -m ci.actions.cpp_lint_action
+
+  shell-lint:
+    name: Shell — shellcheck
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/cicd:latest
+    if: ${{ hashFiles('**/*.sh') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      # You can keep this as a direct command or create a Python wrapper like others
+      - run: |
+          files="$(git ls-files '*.sh' || true)"
+          [ -z "$files" ] && { echo "No shell scripts"; exit 0; }
+          shellcheck -S style -x $files

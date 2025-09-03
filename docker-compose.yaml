@@ -1,0 +1,7 @@
+services:
+  cicd-container:
+    image: "${GHCR_IMAGE}:${TAG}"
+    ports:
+      - "80:80"
+    secrets:
+      - ghcr_token
